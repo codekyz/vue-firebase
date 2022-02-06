@@ -29,15 +29,15 @@ Vue.use(Router)
 const router = new Router({
   mode: 'hash',
   base: process.env.BASE_URL,
-  scrollBehavior () {
+  scrollBehavior() {
     return { x: 0, y: 0 }
   },
   routes: [
 
     {
-    // =============================================================================
-    // MAIN LAYOUT ROUTES
-    // =============================================================================
+      // =============================================================================
+      // MAIN LAYOUT ROUTES
+      // =============================================================================
       path: '',
       component: () => import('./layouts/main/Main.vue'),
       children: [
@@ -53,7 +53,8 @@ const router = new Router({
           name: 'dashboard-analytics',
           component: () => import('./views/DashboardAnalytics.vue'),
           meta: {
-            rule: 'editor'
+            rule: 'editor',
+            authRequired: true
           }
         },
         {
@@ -122,7 +123,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'eCommerce'},
+              { title: 'eCommerce' },
               { title: 'Shop', active: true }
             ],
             pageTitle: 'Shop',
@@ -136,7 +137,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'eCommerce', url:'/apps/eCommerce/shop'},
+              { title: 'eCommerce', url: '/apps/eCommerce/shop' },
               { title: 'Wish List', active: true }
             ],
             pageTitle: 'Wish List',
@@ -150,7 +151,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'eCommerce', url:'/apps/eCommerce/shop'},
+              { title: 'eCommerce', url: '/apps/eCommerce/shop' },
               { title: 'Checkout', active: true }
             ],
             pageTitle: 'Checkout',
@@ -177,8 +178,8 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'eCommerce'},
-              { title: 'Shop', url: {name: 'ecommerce-shop'} },
+              { title: 'eCommerce' },
+              { title: 'Shop', url: { name: 'ecommerce-shop' } },
               { title: 'Item Details', active: true }
             ],
             parent: 'ecommerce-item-detail-view',
@@ -238,7 +239,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'Data List'},
+              { title: 'Data List' },
               { title: 'List View', active: true }
             ],
             pageTitle: 'List View',
@@ -252,7 +253,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'Data List'},
+              { title: 'Data List' },
               { title: 'Thumb View', active: true }
             ],
             pageTitle: 'Thumb View',
@@ -266,7 +267,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'Grid'},
+              { title: 'Grid' },
               { title: 'Vuesax', active: true }
             ],
             pageTitle: 'Grid',
@@ -280,7 +281,7 @@ const router = new Router({
           meta: {
             breadcrumb: [
               { title: 'Home', url: '/' },
-              { title: 'Grid'},
+              { title: 'Grid' },
               { title: 'Tailwind', active: true }
             ],
             pageTitle: 'Tailwind Grid',
@@ -380,6 +381,20 @@ const router = new Router({
               { title: 'Table', active: true }
             ],
             pageTitle: 'Table',
+            rule: 'editor'
+          }
+        },
+        {
+          path: '/ui-elements/table2',
+          name: 'table2',
+          component: () => import('./views/pages/Table2.vue'),
+          meta: {
+            authRequired: true,
+            breadcrumb: [
+              { title: 'Home', url: '/' },
+              { title: 'Table', active: true }
+            ],
+            pageTitle: 'Table 테스트',
             rule: 'editor'
           }
         },
@@ -1307,7 +1322,8 @@ const router = new Router({
           name: 'page-login',
           component: () => import('@/views/pages/login/Login.vue'),
           meta: {
-            rule: 'editor'
+            rule: 'editor',
+            authRequired: false
           }
         },
         {
@@ -1315,7 +1331,8 @@ const router = new Router({
           name: 'page-register',
           component: () => import('@/views/pages/register/Register.vue'),
           meta: {
-            rule: 'editor'
+            rule: 'editor',
+            authRequired: false
           }
         },
         {
@@ -1407,16 +1424,16 @@ router.beforeEach((to, from, next) => {
     const firebaseCurrentUser = firebase.auth().currentUser
 
     // if (
-    //     to.path === "/pages/login" ||
-    //     to.path === "/pages/forgot-password" ||
-    //     to.path === "/pages/error-404" ||
-    //     to.path === "/pages/error-500" ||
-    //     to.path === "/pages/register" ||
-    //     to.path === "/callback" ||
-    //     to.path === "/pages/comingsoon" ||
+    //   to.path === '/pages/login' ||
+    //     // to.path === "/pages/forgot-password" ||
+    //     // to.path === "/pages/error-404" ||
+    //     // to.path === "/pages/error-500" ||
+    //     // to.path === "/pages/register" ||
+    //     // to.path === "/callback" ||
+    //     // to.path === "/pages/comingsoon" ||
     //     (auth.isAuthenticated() || firebaseCurrentUser)
     // ) {
-    //     return next();
+    //   return next('/');
     // }
 
     // If auth required, check login. If login fails redirect to login page
