@@ -2,6 +2,9 @@
   <div>
     <vx-card title="테이블 테스트">
       <a-table :columns="columns" :data-source="data">
+        <template slot="img" slot-scope="record">
+          <img v-if="record.img" :src="record.img" style="width:50px; height:50px;"/>
+        </template>
         <template slot="operation" slot-scope="record">
           <button @click="() => edit(record)">선택</button>
         </template>
@@ -19,6 +22,19 @@
       <vs-button size="small" @click="onDeleteData()">
         데이터 삭제
       </vs-button>
+
+      <div>이미지 업로드</div>
+      
+      <div class="col-md-10" v-if="key">
+        <a-upload
+          :fileList="fileList"
+          :beforeUpload="beforeUpload"
+          @change="handleChange"
+        >
+          <a-button> <a-icon type="upload"/> 업로드 </a-button>
+        </a-upload>
+        <img src="img" />
+      </div>
     </vx-card>
   </div>
 </template>
@@ -29,6 +45,8 @@ import firebase from 'firebase'
 export default {
   data() {
     return {
+      fileList: [],
+      img: '',
       key: '',
       name: '',
       age: '',
@@ -50,6 +68,11 @@ export default {
           key: 'address'
         },
         {
+          title: 'img',
+          key: 'img',
+          scopedSlots: { customRender: 'img' }
+        },
+        {
           title: 'Action',
           key: 'action',
           scopedSlots: { customRender: 'operation' }
@@ -62,6 +85,77 @@ export default {
     this.onLoadData();
   },
   methods: {
+    beforeUpload(file) {
+      this.fileList = [...this.fileList, file];
+      return false;
+    },
+    handleChange(info) {
+      if(info.file.status === 'removed') {
+        this.handleRemove();
+      } else {
+        this.createFile(info.file, 0);
+      }
+    },
+    handleRemove(file) {
+      this.fileList = [];
+      this.img = '';
+    },
+    createFile(file, idx) {
+      if (!file.type.match('image.*')) {
+        alert('이미지 파일을 선택해주세요.');
+        this.handleRemove(file);
+        return;
+      } else {
+        var reader = new FileReader();
+        var vm = this;
+
+        reader.onload = (e) => {
+          vm.saveToFirebaseStorage(e, file, idx);
+        };
+        reader.readAsDataURL(file);
+      }
+    },
+    saveToFirebaseStorage(e, items, idx) {
+      var _key = new Date().getTime() + idx;
+      var self = this;
+
+      var storage = firebase.storage();
+      var storageRef = firebase.storage().ref();
+
+      var _name = items.name.replace(
+        /[~`!#$%\^&*+=\-\[\]\\';,/{}()|\\":<>\?]/g,
+        ""
+      );
+
+      var user = firebase.auth().currentUser;
+
+      var uploadTask = storageRef
+        .child('data/' + user.uid + '/' + _key + '/' + _name)
+        .put(items);
+
+      uploadTask.on(
+        'state_chaged',
+        (snapshot) => {
+          var progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          
+          console.log("Upload is " + progress + "% done"); switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED: // or 'paused'
+            console.log("Upload is paused");
+            break;
+            case firebase.storage.TaskState.RUNNING: // or 'running' console.log("Upload is running");
+            break;
+          }
+        },
+          (error) => { console.log(error);},
+          () => {
+          uploadTask.snapshot.ref.getDownloadURL()
+            .then((downloadURL) => {
+              self.img = downloadURL; 
+            });
+          }
+      )
+    },
     onUpdateData() {
       var db = firebase.firestore();
       var _ref = db.collection('bbs').doc(this.key);
@@ -72,6 +166,7 @@ export default {
           name: self.name,
           age: self.age,
           address: self.address,
+          img: self.img
         })
         .then(() => {
           self.onRefreshData();
@@ -86,6 +181,7 @@ export default {
       this.age = r.age;
       this.address = r.address;
       this.key = r.key;
+      this.img = r.img;
     },
     onInitData() {
       this.key = ''
@@ -106,6 +202,7 @@ export default {
           item.name = this.name
           item.age = this.age
           item.address = this.address
+          item.img = this.img
         }
         return item
       })
@@ -150,6 +247,7 @@ export default {
             name: self.name,
             age: self.age,
             address: self.address,
+            img: self.img
           })
           .then((mRef) => {
             var _t = {
@@ -157,6 +255,7 @@ export default {
               name: self.name,
               age: self.age,
               address: self.address,
+              img: self.img
             };
 
             _t['key'] = mRef.id;
@@ -164,6 +263,7 @@ export default {
           });
       }
     },
-  },
+  }
 };
+
 </script>
